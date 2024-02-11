@@ -9,9 +9,11 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ListView
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -24,6 +26,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var deviceListView: ListView
+    private lateinit var progressBar: ProgressBar
     private lateinit var deviceListAdapter: ArrayAdapter<String>
 
     private val bluetoothReceiver = object : BroadcastReceiver() {
@@ -31,6 +34,7 @@ class MainActivity : AppCompatActivity() {
             when (intent?.action) {
                 BluetoothDevice.ACTION_FOUND -> {
                     handleBluetoothDevice(intent)
+
                 }
             }
         }
@@ -41,6 +45,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         deviceListView = findViewById(R.id.deviceListView)
+        progressBar = findViewById(R.id.discoveryProgressBar)
         deviceListAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1)
         deviceListView.adapter = deviceListAdapter
 
@@ -52,9 +57,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         showNearbyDevicesButton.setOnClickListener {
+
             showNearbyDevices()
         }
         deviceListView.setOnItemClickListener { _, _, position, _ ->
+            progressBar.visibility= View.VISIBLE
             val deviceInfo = deviceListAdapter.getItem(position)
             deviceInfo?.let {
                 val address = it.split(" - ")[1] // Assuming the format is "Name - Address"
@@ -63,6 +70,7 @@ class MainActivity : AppCompatActivity() {
                     pairDevice(device)
                 }
             }
+           // progressBar.visibility= View.GONE
         }
     }
     private fun pairDevice(device: BluetoothDevice) {
@@ -70,8 +78,11 @@ class MainActivity : AppCompatActivity() {
             val method = device.javaClass.getMethod("createBond")
             method.invoke(device)
             showToast("Pairing with device: ${device.address}")
+
         } catch (e: Exception) {
             showToast("Pairing failed: ${e.message}")
+            Toast.makeText(this, "pair device exc", Toast.LENGTH_SHORT).show()
+            progressBar.visibility= View.GONE
         }
     }
 
@@ -83,6 +94,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showNearbyDevices() {
+        //deviceListAdapter.clear()
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED
         ) {
@@ -152,16 +164,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
+        Toast.makeText(this, "onResume", Toast.LENGTH_SHORT).show()
+
+        progressBar.visibility= View.GONE
         super.onResume()
         registerReceiver(bluetoothReceiver, IntentFilter(BluetoothDevice.ACTION_FOUND))
     }
 
     override fun onPause() {
+
         super.onPause()
         unregisterReceiver(bluetoothReceiver)
     }
 
     override fun onDestroy() {
+
         super.onDestroy()
         bluetoothAdapter?.cancelDiscovery()
     }
