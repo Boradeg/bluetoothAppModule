@@ -58,8 +58,20 @@ class MainActivity : AppCompatActivity() {
             val deviceInfo = deviceListAdapter.getItem(position)
             deviceInfo?.let {
                 val address = it.split(" - ")[1] // Assuming the format is "Name - Address"
-                showToast("Bluetooth Address: $address")
+                val bluetoothDevice = bluetoothAdapter?.getRemoteDevice(address)
+                bluetoothDevice?.let { device ->
+                    pairDevice(device)
+                }
             }
+        }
+    }
+    private fun pairDevice(device: BluetoothDevice) {
+        try {
+            val method = device.javaClass.getMethod("createBond")
+            method.invoke(device)
+            showToast("Pairing with device: ${device.address}")
+        } catch (e: Exception) {
+            showToast("Pairing failed: ${e.message}")
         }
     }
 
