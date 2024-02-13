@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">bluetoothAppModule</string>
-    <string name="turn_on">Turn On</string>
+    <string name="turn_on">Turn On Bluetooth</string>
     <string name="turn_off">Turn Off</string>
     <string name="available_devices">Available Devices :</string>
     <string name="paired_devices">Paired Devices :</string>

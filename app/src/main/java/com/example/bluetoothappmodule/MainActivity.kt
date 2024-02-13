@@ -26,7 +26,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.shashank.sony.fancytoastlib.FancyToast
 
+@Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
 
     private val bluetoothAdapter: BluetoothAdapter? by lazy(LazyThreadSafetyMode.NONE) {
@@ -34,14 +36,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var deviceListView: ListView
-
     private lateinit var progressBar: ProgressBar
     private lateinit var deviceListAdapter: ArrayAdapter<String>
     private val pairedDevices = mutableListOf<BluetoothDevice>()
     private lateinit var pairedDeviceListView: ListView
     private lateinit var pairedDeviceListAdapter: ArrayAdapter<String>
-
-
     private val bluetoothReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
@@ -51,6 +50,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
             actionBar.setTitle(Html.fromHtml("<font color='$textColor'>Bluetooth App</font>"))
         }
         pairedDeviceListView = findViewById(R.id.pairedDeviceListView)
-       // refresh = findViewById(R.id.refresh)
+        // refresh = findViewById(R.id.refresh)
         pairedDeviceListAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1)
         pairedDeviceListView.adapter = pairedDeviceListAdapter
         // Register BroadcastReceiver to listen for ACTION_FOUND
@@ -80,13 +80,6 @@ class MainActivity : AppCompatActivity() {
         showNearbyDevices()
         val enableBluetoothButton = findViewById<Button>(R.id.enableBluetoothButton)
         val showNearbyDevicesButton = findViewById<Button>(R.id.showNearbyDevicesButton)
-//        refresh.setOnClickListener {
-//
-//            // Repopulate the list with the latest data
-//            populatePairedDevicesList()
-//            // Notify the adapter about the changes in the data set
-//            pairedDeviceListAdapter.notifyDataSetChanged()
-//        }
         enableBluetoothButton.setOnClickListener {
             enableBluetooth()
         }
@@ -96,12 +89,11 @@ class MainActivity : AppCompatActivity() {
         }
         pairedDeviceListView.setOnItemClickListener { parent, view, position, id ->
             val selectedItem = parent.getItemAtPosition(position) as String
-            showToast("Clicked on: $selectedItem")
-
+            showToastInfo("Clicked on: $selectedItem")
             // Retrieve the BluetoothDevice object associated with the clicked item
-            val selectedDeviceAddress = selectedItem.split(" - ")[1] // Assuming the format is "Name - Address"
+            val selectedDeviceAddress =
+                selectedItem.split(" - ")[1] // Assuming the format is "Name - Address"
             val bluetoothDevice = pairedDevices.find { it.address == selectedDeviceAddress }
-
             // Pass the BluetoothDevice object to another function
             bluetoothDevice?.let { device ->
                 showUnpairDialog(device)
@@ -109,7 +101,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         deviceListView.setOnItemClickListener { _, _, position, _ ->
-            progressBar.visibility= View.VISIBLE
+            progressBar.visibility = View.VISIBLE
             val deviceInfo = deviceListAdapter.getItem(position)
             deviceInfo?.let {
                 val address = it.split(" - ")[1] // Assuming the format is "Name - Address"
@@ -118,35 +110,39 @@ class MainActivity : AppCompatActivity() {
                     pairDevice(device)
                 }
             }
-           // progressBar.visibility= View.GONE
+            // progressBar.visibility= View.GONE
         }
     }
+
+    @SuppressLint("MissingPermission")
     private fun pairDevice(device: BluetoothDevice) {
         when (device.bondState) {
             BluetoothDevice.BOND_BONDED -> {
                 showUnpairDialog(device)
-                showToast("Device ${device.name} is already paired")
+                showToastInfo("Device ${device.name} is already paired")
                 progressBar.visibility = View.GONE
                 updatePairedDevicesList() // Update the list of paired devices
             }
+
             BluetoothDevice.BOND_NONE -> {
                 try {
                     val method = device.javaClass.getMethod("createBond")
                     method.invoke(device)
-                    showToast("Pairing with device: ${device.address}")
+                    showToastInfo("Pairing with device: ${device.address}")
                     populatePairedDevicesList()
                     // Notify the adapter about the changes in the data set
                     pairedDeviceListAdapter.notifyDataSetChanged()
 
 
                 } catch (e: Exception) {
-                    showToast("Pairing failed: ${e.message}")
+                    showToastError("Pairing failed: ${e.message}")
                     progressBar.visibility = View.GONE
                 }
             }
         }
     }
 
+    @SuppressLint("MissingPermission")
     private fun populatePairedDevicesList() {
         // Clear the existing list
         pairedDevices.clear()
@@ -162,6 +158,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("MissingPermission")
     private fun updatePairedDevicesList() {
         // Clear the existing list
         pairedDevices.clear()
@@ -183,7 +180,7 @@ class MainActivity : AppCompatActivity() {
     // Other existing methods
 
 
-
+    @SuppressLint("MissingPermission")
     private fun showUnpairDialog(device: BluetoothDevice) {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Unpair Device")
@@ -203,21 +200,23 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
+    @SuppressLint("MissingPermission")
     private fun unpairDevice(device: BluetoothDevice) {
         try {
             val method = device.javaClass.getMethod("removeBond")
             method.invoke(device)
-            showToast("Device ${device.name} unpaired successfully")
+            showToastSuccess("Device ${device.name} unpaired successfully")
             // Remove device from the list of paired devices
             pairedDevices.remove(device)
             // Remove device from the list view
             pairedDeviceListAdapter.remove("${device.name} - ${device.address}")
             populatePairedDevicesList()
         } catch (e: Exception) {
-            showToast("Failed to unpair device: ${e.message}")
+            showToastError("Failed to unpair device: ${e.message}")
         }
     }
+
+    @SuppressLint("MissingPermission")
     private fun enableBluetooth() {
         bluetoothAdapter?.takeUnless { it.isEnabled }?.apply {
             // Bluetooth is not enabled, start the enable Bluetooth intent
@@ -225,7 +224,7 @@ class MainActivity : AppCompatActivity() {
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
         } ?: run {
             // Bluetooth is already enabled, show toast message
-            showToast("Bluetooth is already enabled")
+            showToastWarning("Bluetooth is already enabled")
         }
     }
 
@@ -255,7 +254,7 @@ class MainActivity : AppCompatActivity() {
             if (bluetoothAdapter != null && bluetoothAdapter!!.isEnabled) {
                 bluetoothAdapter!!.startDiscovery()
             } else {
-                showToast("Bluetooth is not enabled")
+                showToastWarning("Bluetooth is not enabled")
             }
         } else {
             // Permission not granted, request it
@@ -265,6 +264,7 @@ class MainActivity : AppCompatActivity() {
 
     private val discoveredDevicesSet = mutableSetOf<String>()
 
+    @SuppressLint("MissingPermission")
     private fun handleBluetoothDevice(intent: Intent) {
         val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
         device?.let {
@@ -277,7 +277,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
     private fun showToast(message: String) {
         Toast.makeText(
             this,
@@ -285,7 +284,22 @@ class MainActivity : AppCompatActivity() {
             Toast.LENGTH_SHORT
         ).show()
     }
+    private fun showToastSuccess(message: String) {
+        FancyToast.makeText(this,message,FancyToast.LENGTH_LONG,FancyToast.SUCCESS,true).show();
 
+    }
+    private fun showToastError(message: String) {
+        FancyToast.makeText(this,message,FancyToast.LENGTH_LONG,FancyToast.ERROR,true).show();
+
+    }
+    private fun showToastInfo(message: String) {
+        FancyToast.makeText(this,message,FancyToast.LENGTH_LONG,FancyToast.INFO,true).show();
+
+    }
+    private fun showToastWarning(message: String) {
+        FancyToast.makeText(this,message,FancyToast.LENGTH_LONG,FancyToast.WARNING,true).show();
+
+    }
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
@@ -296,10 +310,11 @@ class MainActivity : AppCompatActivity() {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     startBluetoothDiscovery()
                 } else {
-                    showToast("Permission denied. Unable to discover nearby devices.")
+                    showToastError("Permission denied. Unable to discover nearby devices.")
                 }
                 return
             }
+
             else -> {
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults)
             }
@@ -309,10 +324,8 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         populatePairedDevicesList()
-        Toast.makeText(this, "onResume", Toast.LENGTH_SHORT).show()
-
-        progressBar.visibility= View.GONE
-
+        //Toast.makeText(this, "onResume", Toast.LENGTH_SHORT).show()
+        progressBar.visibility = View.GONE
         registerReceiver(bluetoothReceiver, IntentFilter(BluetoothDevice.ACTION_FOUND))
     }
 
@@ -322,6 +335,7 @@ class MainActivity : AppCompatActivity() {
         unregisterReceiver(bluetoothReceiver)
     }
 
+    @SuppressLint("MissingPermission")
     override fun onDestroy() {
 
         super.onDestroy()
@@ -332,7 +346,6 @@ class MainActivity : AppCompatActivity() {
         private const val REQUEST_ENABLE_BT = 1
         private const val REQUEST_LOCATION_PERMISSION = 2
     }
-
 
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -346,12 +359,13 @@ class MainActivity : AppCompatActivity() {
             R.id.action_refresh -> {
                 // Handle refresh button click event here
                 // Perform refresh operation
-                Toast.makeText(this, "Refresh button clicked", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(this, "Refresh button clicked", Toast.LENGTH_SHORT).show()
                 populatePairedDevicesList()
                 // Notify the adapter about the changes in the data set
                 pairedDeviceListAdapter.notifyDataSetChanged()
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
