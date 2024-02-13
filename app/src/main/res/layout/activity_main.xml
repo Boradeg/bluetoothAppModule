@@ -71,16 +71,46 @@
             android:text="Discover Devices"
             />
     </RelativeLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Available Devices :"
+        android:layout_margin="10dp"
+        android:layout_below="@id/button"
+        android:layout_marginTop="60dp"
+        android:textStyle="bold"
+        android:textSize="30dp"
+
+        />
     <ListView
         android:id="@+id/deviceListView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="200dp"
+        android:layout_marginBottom="100dp"
         android:layout_below="@id/button"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="56dp"/>
     <ProgressBar
         android:id="@+id/discoveryProgressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:visibility="gone" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Paired Devices :"
+        android:layout_margin="10dp"
+        android:layout_marginTop="60dp"
+        android:textStyle="bold"
+        android:textSize="30dp"
+        android:layout_above="@+id/pairedDeviceListView"
+        />
+    <ListView
+        android:id="@+id/pairedDeviceListView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_below="@id/deviceListView"
+      />
+
 </RelativeLayout>

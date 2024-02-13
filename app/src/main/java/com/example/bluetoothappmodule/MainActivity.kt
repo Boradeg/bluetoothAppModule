@@ -15,6 +15,7 @@ import android.widget.Button
 import android.widget.ListView
 import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -28,18 +29,20 @@ class MainActivity : AppCompatActivity() {
     private lateinit var deviceListView: ListView
     private lateinit var progressBar: ProgressBar
     private lateinit var deviceListAdapter: ArrayAdapter<String>
+    private val pairedDevices = mutableListOf<BluetoothDevice>()
+    private lateinit var pairedDeviceListView: ListView
+    private lateinit var pairedDeviceListAdapter: ArrayAdapter<String>
+
 
     private val bluetoothReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
                 BluetoothDevice.ACTION_FOUND -> {
                     handleBluetoothDevice(intent)
-
                 }
             }
         }
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -57,7 +60,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         showNearbyDevicesButton.setOnClickListener {
-
             showNearbyDevices()
         }
         deviceListView.setOnItemClickListener { _, _, position, _ ->
@@ -74,18 +76,52 @@ class MainActivity : AppCompatActivity() {
         }
     }
     private fun pairDevice(device: BluetoothDevice) {
-        try {
-            val method = device.javaClass.getMethod("createBond")
-            method.invoke(device)
-            showToast("Pairing with device: ${device.address}")
-
-        } catch (e: Exception) {
-            showToast("Pairing failed: ${e.message}")
-            Toast.makeText(this, "pair device exc", Toast.LENGTH_SHORT).show()
-            progressBar.visibility= View.GONE
+        when (device.bondState) {
+            BluetoothDevice.BOND_BONDED -> {
+                showUnpairDialog(device)
+                showToast("Device ${device.name} is already paired")
+                progressBar.visibility = View.GONE
+            }
+            BluetoothDevice.BOND_NONE -> {
+                try {
+                    val method = device.javaClass.getMethod("createBond")
+                    method.invoke(device)
+                    showToast("Pairing with device: ${device.address}")
+                } catch (e: Exception) {
+                    showToast("Pairing failed: ${e.message}")
+                    progressBar.visibility = View.GONE
+                }
+            }
         }
     }
 
+    private fun showUnpairDialog(device: BluetoothDevice) {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Unpair Device")
+        builder.setMessage("Do you want to unpair ${device.name}?")
+        builder.setPositiveButton("Yes") { _, _ ->
+            unpairDevice(device)
+        }
+        builder.setNegativeButton("No") { dialog, _ ->
+            dialog.dismiss()
+        }
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+    private fun unpairDevice(device: BluetoothDevice) {
+        try {
+            val method = device.javaClass.getMethod("removeBond")
+            method.invoke(device)
+            showToast("Device ${device.name} unpaired successfully")
+            // Remove device from the list of paired devices
+            pairedDevices.remove(device)
+            // Remove device from the list view
+            pairedDeviceListAdapter.remove("${device.name} - ${device.address}")
+        } catch (e: Exception) {
+            showToast("Failed to unpair device: ${e.message}")
+        }
+    }
     private fun enableBluetooth() {
         bluetoothAdapter?.takeUnless { it.isEnabled }?.apply {
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
