@@ -102,11 +102,11 @@
 
             <ListView
                 android:id="@+id/pairedDeviceListView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_height="200dp"
                 android:layout_below="@id/refresh"
                 android:layout_marginTop="10dp"
-                tools:ignore="NestedScrolling" />
+                 />
 
 
         </RelativeLayout>

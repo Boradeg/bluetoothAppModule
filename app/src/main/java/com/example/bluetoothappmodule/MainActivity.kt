@@ -176,10 +176,6 @@ class MainActivity : AppCompatActivity() {
         // Notify the adapter about the changes in the data set
         pairedDeviceListAdapter.notifyDataSetChanged()
     }
-
-    // Other existing methods
-
-
     @SuppressLint("MissingPermission")
     private fun showUnpairDialog(device: BluetoothDevice) {
         val builder = AlertDialog.Builder(this)
