@@ -9,7 +9,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Bundle
+import android.text.Html
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -19,6 +23,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
@@ -29,7 +34,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var deviceListView: ListView
-    private lateinit var refresh: TextView
+
     private lateinit var progressBar: ProgressBar
     private lateinit var deviceListAdapter: ArrayAdapter<String>
     private val pairedDevices = mutableListOf<BluetoothDevice>()
@@ -50,8 +55,16 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        val actionBar = supportActionBar
+        if (actionBar != null) {
+            val textColor = Color.parseColor("#FDFDFD")
+            actionBar.setTitle("Bluetooth App")
+            actionBar.setLogo(R.drawable.bluetooth)
+            actionBar.setDisplayShowTitleEnabled(true)
+            actionBar.setTitle(Html.fromHtml("<font color='$textColor'>Bluetooth App</font>"))
+        }
         pairedDeviceListView = findViewById(R.id.pairedDeviceListView)
-        refresh = findViewById(R.id.refresh)
+       // refresh = findViewById(R.id.refresh)
         pairedDeviceListAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1)
         pairedDeviceListView.adapter = pairedDeviceListAdapter
         // Register BroadcastReceiver to listen for ACTION_FOUND
@@ -67,9 +80,13 @@ class MainActivity : AppCompatActivity() {
         showNearbyDevices()
         val enableBluetoothButton = findViewById<Button>(R.id.enableBluetoothButton)
         val showNearbyDevicesButton = findViewById<Button>(R.id.showNearbyDevicesButton)
-        refresh.setOnClickListener {
-           // onResume()
-        }
+//        refresh.setOnClickListener {
+//
+//            // Repopulate the list with the latest data
+//            populatePairedDevicesList()
+//            // Notify the adapter about the changes in the data set
+//            pairedDeviceListAdapter.notifyDataSetChanged()
+//        }
         enableBluetoothButton.setOnClickListener {
             enableBluetooth()
         }
@@ -110,12 +127,17 @@ class MainActivity : AppCompatActivity() {
                 showUnpairDialog(device)
                 showToast("Device ${device.name} is already paired")
                 progressBar.visibility = View.GONE
+                updatePairedDevicesList() // Update the list of paired devices
             }
             BluetoothDevice.BOND_NONE -> {
                 try {
                     val method = device.javaClass.getMethod("createBond")
                     method.invoke(device)
                     showToast("Pairing with device: ${device.address}")
+                    populatePairedDevicesList()
+                    // Notify the adapter about the changes in the data set
+                    pairedDeviceListAdapter.notifyDataSetChanged()
+
 
                 } catch (e: Exception) {
                     showToast("Pairing failed: ${e.message}")
@@ -141,7 +163,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updatePairedDevicesList() {
-        onResume()
         // Clear the existing list
         pairedDevices.clear()
         pairedDeviceListAdapter.clear()
@@ -168,17 +189,19 @@ class MainActivity : AppCompatActivity() {
         builder.setTitle("Unpair Device")
         builder.setMessage("Do you want to unpair ${device.name}?")
         builder.setPositiveButton("Yes") { _, _ ->
+
             unpairDevice(device)
             // After unpairing, update the paired devices list
             updatePairedDevicesList()
+
         }
         builder.setNegativeButton("No") { dialog, _ ->
             dialog.dismiss()
-            populatePairedDevicesList()
         }
         val dialog = builder.create()
         dialog.show()
     }
+
 
 
     private fun unpairDevice(device: BluetoothDevice) {
@@ -309,4 +332,29 @@ class MainActivity : AppCompatActivity() {
         private const val REQUEST_ENABLE_BT = 1
         private const val REQUEST_LOCATION_PERMISSION = 2
     }
+
+
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_refresh -> {
+                // Handle refresh button click event here
+                // Perform refresh operation
+                Toast.makeText(this, "Refresh button clicked", Toast.LENGTH_SHORT).show()
+                populatePairedDevicesList()
+                // Notify the adapter about the changes in the data set
+                pairedDeviceListAdapter.notifyDataSetChanged()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+
 }

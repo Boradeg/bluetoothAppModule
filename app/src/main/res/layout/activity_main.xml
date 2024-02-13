@@ -4,114 +4,112 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
-    <RelativeLayout
+
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:orientation="horizontal"
-        android:background="@drawable/gredient9"
-        android:id="@+id/tool_layout3"
-        tools:ignore="MissingConstraints">
+        android:layout_height="match_parent"
+        android:layout_marginHorizontal="30dp"
+        android:layout_marginVertical="30dp"
+        tools:ignore="UselessParent">
 
-        <ImageView
-            android:id="@+id/icon"
-            android:layout_width="30dp"
-            android:layout_marginTop="20dp"
-            android:layout_alignParentLeft="true"
-            android:layout_height="30dp"
-            android:layout_marginStart="20dp"
-            android:src="@drawable/bluetooth" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/locationName"
-            android:layout_width="wrap_content"
-            android:visibility="visible"
-            android:textStyle="bold"
-            android:layout_marginTop="20dp"
-            android:layout_toRightOf="@+id/icon"
-            android:layout_height="wrap_content"
-            android:text="Bluetooth App"
-            android:layout_marginStart="20dp"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="60dp"
+                android:background="@drawable/gredient2" />
+
+            <RelativeLayout
+                android:id="@+id/button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:textAllCaps="false"
+                    android:backgroundTint="#527FC1"
+                    android:id="@+id/enableBluetoothButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginStart="5dp"
+                    android:text="@string/turn_on"
+                    android:textColor="@color/white"
+                    />
+                <Button
+                    android:visibility="gone"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    android:backgroundTint="#527FC1"
+                    android:id="@+id/showNearbyDevicesButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="10dp"
+                    android:text="@string/turn_off" />
+            </RelativeLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/button"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                android:text="@string/available_devices"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <ListView
+                android:id="@+id/deviceListView"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_below="@id/button"
+                android:layout_marginTop="56dp"
+                tools:ignore="NestedScrolling" />
+
+            <View
+                android:id="@+id/view"
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_below="@+id/deviceListView"
+                android:background="#493E3E" />
+
+            <ProgressBar
+                android:id="@+id/discoveryProgressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/refresh"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/view"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                android:text="@string/paired_devices"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <ListView
+                android:id="@+id/pairedDeviceListView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/refresh"
+                android:layout_marginTop="10dp"
+                tools:ignore="NestedScrolling" />
 
 
-        <ImageView
-            android:id="@+id/changeLanguageButton"
-            android:layout_width="50dp"
-            android:layout_alignParentRight="true"
-            android:layout_height="50dp"
-            />
-    </RelativeLayout>
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:background="@drawable/gredient2"
-        android:layout_marginTop="60dp"
-        android:layout_height="match_parent">
-    </RelativeLayout>
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:id="@+id/button"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@+id/tool_layout3"
-        android:layout_height="wrap_content">
-        <Button
-            android:id="@+id/enableBluetoothButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
-            android:text="Turn On Bluetooth"
-            />
-
-        <Button
-            android:id="@+id/showNearbyDevicesButton"
-            android:layout_width="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/enableBluetoothButton"
-            android:text="Discover Devices"
-            />
-    </RelativeLayout>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Available Devices :"
-        android:layout_margin="10dp"
-        android:layout_below="@id/button"
-        android:layout_marginTop="60dp"
-        android:textStyle="bold"
-        android:textSize="30dp"
-
-        />
-    <ListView
-        android:id="@+id/deviceListView"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginBottom="100dp"
-        android:layout_below="@id/button"
-        android:layout_marginTop="56dp"/>
-    <ProgressBar
-        android:id="@+id/discoveryProgressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:visibility="gone" />
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Paired Devices :"
-        android:id="@+id/refresh"
-        android:layout_margin="10dp"
-        android:layout_marginTop="60dp"
-        android:textStyle="bold"
-        android:textSize="30dp"
-        android:layout_above="@+id/pairedDeviceListView"
-        />
-    <ListView
-        android:id="@+id/pairedDeviceListView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_below="@id/deviceListView"
-      />
-
+        </RelativeLayout>
+    </ScrollView>
 </RelativeLayout>
+
