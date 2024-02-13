@@ -47,17 +47,13 @@
         android:background="@drawable/gredient2"
         android:layout_marginTop="60dp"
         android:layout_height="match_parent">
-
     </RelativeLayout>
     <RelativeLayout
         android:layout_width="wrap_content"
         android:id="@+id/button"
-
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/tool_layout3"
         android:layout_height="wrap_content">
-
-
         <Button
             android:id="@+id/enableBluetoothButton"
             android:layout_width="wrap_content"
@@ -74,8 +70,6 @@
             android:layout_toRightOf="@+id/enableBluetoothButton"
             android:text="Discover Devices"
             />
-
-
     </RelativeLayout>
     <ListView
         android:id="@+id/deviceListView"
@@ -87,7 +81,6 @@
         android:id="@+id/discoveryProgressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
         android:layout_centerInParent="true"
         android:visibility="gone" />
 </RelativeLayout>

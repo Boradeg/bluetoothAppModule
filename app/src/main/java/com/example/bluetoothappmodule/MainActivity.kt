@@ -127,13 +127,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val discoveredDevicesSet = mutableSetOf<String>()
+
     private fun handleBluetoothDevice(intent: Intent) {
         val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
         device?.let {
             val deviceInfo = "${it.name} - ${it.address}"
-            deviceListAdapter.add(deviceInfo)
+            if (deviceInfo !in discoveredDevicesSet) {
+                discoveredDevicesSet.add(deviceInfo)
+                deviceListAdapter.add(deviceInfo)
+            }
         }
     }
+
+
 
     private fun showToast(message: String) {
         Toast.makeText(
